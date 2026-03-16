@@ -38,7 +38,8 @@ public class UserService(AppDbContext db) : IUserService
 
     public async Task<UserDto> UpdateUserAsync(int id, CreateUserDto dto)
     {
-        var user = await GetUserAsync(id);
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.UserId == id)
+            ?? throw new KeyNotFoundException($"User with id {id} not found");
 
         user.Name = dto.Name;
         user.Email = dto.Email;
@@ -46,7 +47,7 @@ public class UserService(AppDbContext db) : IUserService
 
         await _db.SaveChangesAsync();
 
-        return user;
+        return MapToDto(user);
     }
 
     private static UserDto MapToDto(User user) => new()
